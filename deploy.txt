@@ -1,0 +1,20 @@
+1. Vercel
+- Vercel CLI
+    - Install Vercel
+        (For both use DOMAIN url from vercel website)
+        (First Time Setup)
+        npm i -g vercel
+        vercel -v
+        vercel login  
+
+        (For Every Project)
+        vercel --prod
+
+    -Without Install Vecel
+        (First Time Setup)
+        -npx vercel login 
+
+        (For Every Project)
+        -npx vercel --prod
+
+- Github
