@@ -22,6 +22,7 @@ export default defineConfig([
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
       'no-console': 'warn',
       'no-undef': 'error',
+      'no-redeclare': 'error',
     },
   },
   {
