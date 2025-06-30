@@ -12,7 +12,7 @@ app.use(cors());
 app.use('/api/v1/students', StudentRoutes);
 
 const getAController = (req: Request, res: Response) => {
-  const a = 10;
+  const a = 'Getting Home Page';
   res.send(a);
 };
 
