@@ -29,6 +29,7 @@ const userSchema = new Schema<TUser>(
 // pre save middileware / hook: will work before saving the data
 userSchema.pre('save', async function (next) {
   //   console.log(this, 'pre hook: we will save the data');
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
   // Hash the password before saving
   user.password = await bcrypt.hash(
