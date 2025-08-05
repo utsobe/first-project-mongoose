@@ -7,8 +7,6 @@ import {
   TUserName,
   StudentModel,
 } from './student.interface';
-import bcrypt from 'bcrypt';
-import config from '../../config';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -97,10 +95,11 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'TStudent ID is required'],
       unique: true,
     },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      maxlength: [30, 'Password cannot exceed 30 characters'],
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'User id is required'],
+      unique: true,
+      ref: 'User',
     },
     name: {
       type: userNameSchema,
@@ -120,10 +119,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       type: String,
       required: [true, 'Email is required'],
       unique: true,
-      //   validate: {
-      //     validator: (v: string) => validator.isEmail(v),
-      //     message: '{VALUE} is not a valid email address',
-      //   },
     },
     contactNumber: {
       type: String,
@@ -158,11 +153,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'Local Guardian details are required'],
     },
     profileImage: { type: String },
-    isActive: {
-      type: String,
-      enum: ['active', 'blocked'],
-      default: 'active',
-    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -181,24 +171,6 @@ studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName} ${this.name.middleName ? this.name.middleName + ' ' : ''}${this.name.lastName}`;
 });
 
-// pre save middileware / hook: will work before saving the data
-studentSchema.pre('save', async function (next) {
-  //   console.log(this, 'pre hook: we will save the data');
-  const user = this;
-  // Hash the password before saving
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-
-// post save middileware / hook: will work after saving the data
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
-});
-
 // creating a custom static method
 studentSchema.statics.isUserExists = async function (id: string) {
   // Check if a student with the given ID exists
@@ -208,10 +180,7 @@ studentSchema.statics.isUserExists = async function (id: string) {
 
 // Query middleware: will work before executing the query
 studentSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } }); // Exclude deleted students from the query
-  //   console.log(this, 'pre hook: we will find the data');
-  // Remove the password field from the query result
-  //   this.select('-password'); // Exclude password field from the result
+  this.find({ isDeleted: { $ne: true } });
   next();
 });
 
@@ -221,17 +190,9 @@ studentSchema.pre('findOne', function (next) {
 });
 
 studentSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } }); // Exclude deleted students
-  //   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } }); // Exclude deleted students from the aggregation
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
-
-// create a custom instance method to check if a user exists
-// studentSchema.methods.isUserExists = async function (id: string) {
-//   // Check if a student with the given ID exists
-//   const existingUser = await Student.findOne({ id });
-//   return existingUser;
-// };
 
 // Export the model
 export const Student = model<TStudent, StudentModel>('Student', studentSchema);

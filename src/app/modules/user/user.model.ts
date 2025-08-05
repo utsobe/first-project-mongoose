@@ -1,5 +1,7 @@
 import { model, Schema } from 'mongoose';
 import { TUser } from './user.interface';
+import config from '../../config';
+import bcrypt from 'bcrypt';
 
 const userSchema = new Schema<TUser>(
   {
@@ -23,5 +25,23 @@ const userSchema = new Schema<TUser>(
     timestamps: true,
   },
 );
+
+// pre save middileware / hook: will work before saving the data
+userSchema.pre('save', async function (next) {
+  //   console.log(this, 'pre hook: we will save the data');
+  const user = this;
+  // Hash the password before saving
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+  next();
+});
+
+// post save middileware / hook: will work after saving the data
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
 
 export const User = model<TUser>('User', userSchema);
