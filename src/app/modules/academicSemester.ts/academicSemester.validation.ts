@@ -31,6 +31,41 @@ const createAcademicSemesterValidationSchema = z.object({
   }),
 });
 
+const updateAcademicSemesterValidationSchema = z.object({
+  body: z.object({
+    name: z
+      .enum([...AcademicSemesterName] as [string, ...string[]], {
+        errorMap: () => ({
+          message: "Semester name must be one of: 'Autumn', 'Summer', 'Fall'",
+        }),
+      })
+      .optional(),
+    year: z.string().optional(),
+    code: z
+      .enum([...AcademicSemesterCode] as [string, ...string[]], {
+        errorMap: () => ({
+          message: "Semester code must be one of: '01', '02', '03'",
+        }),
+      })
+      .optional(),
+    startMonth: z
+      .enum([...Months] as [string, ...string[]], {
+        errorMap: () => ({
+          message: 'Start Month must be a valid month',
+        }),
+      })
+      .optional(),
+    endMonth: z
+      .enum([...Months] as [string, ...string[]], {
+        errorMap: () => ({
+          message: 'End Month must be a valid month',
+        }),
+      })
+      .optional(),
+  }),
+});
+
 export const AcademicSemesterValidation = {
   createAcademicSemesterValidationSchema,
+  updateAcademicSemesterValidationSchema,
 };
